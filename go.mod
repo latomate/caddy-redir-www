@@ -1,4 +1,4 @@
-module redir_www
+module github.com/latomate/caddy-redir-www
 
 go 1.22.2
 
