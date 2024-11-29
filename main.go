@@ -1,4 +1,4 @@
-package redirwww
+package redir_www
 
 import (
 	"net"
