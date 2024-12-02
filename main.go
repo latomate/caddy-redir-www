@@ -31,29 +31,30 @@ func (RedirWww) CaddyModule() caddy.ModuleInfo {
 	}
 }
 
-func (rd *RedirWww) Provision(ctx caddy.Context) error {
-	rd.logger = ctx.Logger() // g.logger is a *zap.Logger
+func (rw *RedirWww) Provision(ctx caddy.Context) error {
+	rw.logger = ctx.Logger() // g.logger is a *zap.Logger
 
 	tlsAppIface, err := ctx.App("tls")
 	if err != nil {
 		return fmt.Errorf("getting tls app: %v", err)
 	}
-	rd.tlsApp = tlsAppIface.(*caddytls.TLS)
+	rw.tlsApp = tlsAppIface.(*caddytls.TLS)
 
 	return nil
 }
 
-func (rd RedirWww) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
+func (rw RedirWww) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
 	//response, err := net.LookupTXT("_redirwww." + r.Host)
 
 	//if err != nil || len(response) == 0 {
-	//	rd.logger.Info("error", zap.String("host", "_redirwww."+r.Host), zap.Error(err))
+	//	rw.logger.Info("error", zap.String("host", "_redirwww."+r.Host), zap.Error(err))
 	//	return next.ServeHTTP(w, r)
 	//}
 
-	rd.logger.Info("redir_www", zap.String("ask", rd.tlsApp.Automation.OnDemand.Ask))
+	//rw.logger.Info("redir_www", zap.String("ask", rw.tlsApp.Automation.OnDemand.Ask))
+	rw.logger.Info("redir_www", zap.String("ask", "coucou"))
 
-	//rd.logger.Info("redir_www", zap.String("host", r.Host), zap.String("response", response[0]))
+	//rw.logger.Info("redir_www", zap.String("host", r.Host), zap.String("response", response[0]))
 
 	//w.Header().Set("Location", response[0])
 	//w.WriteHeader(301)
@@ -62,15 +63,15 @@ func (rd RedirWww) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyh
 }
 
 // UnmarshalCaddyfile implements caddyfile.Unmarshaler.
-func (rd *RedirWww) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
+func (rw *RedirWww) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 	return nil
 }
 
 // parseCaddyfile unmarshals tokens from h into a new RedirWww.
 func parseCaddyfile(h httpcaddyfile.Helper) (caddyhttp.MiddlewareHandler, error) {
-	var rd RedirWww
-	err := rd.UnmarshalCaddyfile(h.Dispenser)
-	return rd, err
+	var rw RedirWww
+	err := rw.UnmarshalCaddyfile(h.Dispenser)
+	return rw, err
 }
 
 // Interface guard
