@@ -47,12 +47,15 @@ func (rw RedirWww) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyh
 	//response, err := net.LookupTXT("_redirwww." + r.Host)
 
 	//if err != nil || len(response) == 0 {
-	//	rw.logger.Info("error", zap.String("host", "_redirwww."+r.Host), zap.Error(err))
-	//	return next.ServeHTTP(w, r)
+	//    rw.logger.Info("error", zap.String("host", "_redirwww."+r.Host), zap.Error(err))
+	//    return next.ServeHTTP(w, r)
 	//}
 
-	//rw.logger.Info("redir_www", zap.String("ask", rw.tlsApp.Automation.OnDemand.Ask))
-	rw.logger.Info("redir_www", zap.String("ask", "coucou"))
+	if rw.tlsApp.Automation != nil {
+		if rw.tlsApp.Automation.OnDemand != nil {
+			rw.logger.Info("redir_www", zap.String("ask", rw.tlsApp.Automation.OnDemand.Ask))
+		}
+	}
 
 	//rw.logger.Info("redir_www", zap.String("host", r.Host), zap.String("response", response[0]))
 
