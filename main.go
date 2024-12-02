@@ -1,13 +1,14 @@
 package redir_www
 
 import (
-	"net"
+	"fmt"
 	"net/http"
 
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"github.com/caddyserver/caddy/v2/caddyconfig/httpcaddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
+	"github.com/caddyserver/caddy/v2/modules/caddytls"
 	"go.uber.org/zap"
 )
 
@@ -17,8 +18,9 @@ func init() {
 }
 
 // RedirWww is a redirirection for non-www websites.
-type RedirWww struct{
+type RedirWww struct {
 	logger *zap.Logger
+	tlsApp *caddytls.TLS
 }
 
 // CaddyModule returns the Caddy module information.
@@ -32,21 +34,31 @@ func (RedirWww) CaddyModule() caddy.ModuleInfo {
 func (rd *RedirWww) Provision(ctx caddy.Context) error {
 	rd.logger = ctx.Logger() // g.logger is a *zap.Logger
 
+	tlsAppIface, err := ctx.App("tls")
+	if err != nil {
+		return fmt.Errorf("getting tls app: %v", err)
+	}
+	rd.tlsApp = tlsAppIface.(*caddytls.TLS)
+
+	rd.logger.Info("redir_www", zap.String("ask", rd.tlsApp.Automation.OnDemand.Ask))
+
 	return nil
 }
 
 func (rd RedirWww) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
-	response, err := net.LookupTXT("_redirwww." + r.Host)
+	//response, err := net.LookupTXT("_redirwww." + r.Host)
 
-	if err != nil || len(response) == 0 {
-		rd.logger.Info("error", zap.String("host", "_redirwww." + r.Host), zap.Error(err))
-		return next.ServeHTTP(w, r)
-	}
+	//if err != nil || len(response) == 0 {
+	//	rd.logger.Info("error", zap.String("host", "_redirwww."+r.Host), zap.Error(err))
+	//	return next.ServeHTTP(w, r)
+	//}
 
-	rd.logger.Info("redir_www", zap.String("host", r.Host), zap.String("response", response[0]))
+	rd.logger.Info("redir_www bis", zap.String("ask", rd.tlsApp.Automation.OnDemand.Ask))
 
-	w.Header().Set("Location", response[0])
-	w.WriteHeader(301)
+	//rd.logger.Info("redir_www", zap.String("host", r.Host), zap.String("response", response[0]))
+
+	//w.Header().Set("Location", response[0])
+	//w.WriteHeader(301)
 
 	return next.ServeHTTP(w, r)
 }
@@ -65,7 +77,7 @@ func parseCaddyfile(h httpcaddyfile.Helper) (caddyhttp.MiddlewareHandler, error)
 
 // Interface guard
 var (
-	_ caddy.Provisioner           = (*RedirWww)(nil)
+	_ caddy.Provisioner = (*RedirWww)(nil)
 	// _ caddy.Validator             = (*RedirWww)(nil)
 	_ caddyhttp.MiddlewareHandler = (*RedirWww)(nil)
 	_ caddyfile.Unmarshaler       = (*RedirWww)(nil)
